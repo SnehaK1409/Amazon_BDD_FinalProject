@@ -1,0 +1,53 @@
+package appfeaturesStef;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+
+import driverFactoryClass.DriverFactory;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+
+public class AppHooks 
+{
+
+	WebDriver driver;
+	DriverFactory df;
+	@Before
+	public void initiateBrowser() throws IOException
+	{
+		Properties prop=new Properties(); 
+		String path =System.getProperty("user.dir")+"//src//test//resources//config.properties";
+		FileInputStream fis=new FileInputStream(path);
+		prop.load(fis);
+		String browserName = prop.getProperty("browser");
+		df=new DriverFactory();
+		driver=df.initBrowser(browserName);
+		driver.manage().window().maximize();
+	}
+	
+	@After
+	public void tearDown()
+	{
+		driver.quit();
+	}
+	
+	@After
+	public void afterScenario(Scenario scenario) throws IOException
+	{
+		if(scenario.isFailed())
+		{
+			TakesScreenshot ts=(TakesScreenshot)driver;
+			File screenshotFile = ts.getScreenshotAs(OutputType.FILE);
+			FileUtils.copyFile(screenshotFile, new File("E:\\Advance Testing Techologies\\"+scenario.getName()+".png"));
+		}
+	}
+	
+}
